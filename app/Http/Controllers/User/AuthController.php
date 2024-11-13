@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
+
+    /**
+     * Signup Here
+     * 
+     */
     public function signup(Request $request)
     {
         //dd($request->all());
@@ -34,6 +39,7 @@ class AuthController extends Controller
             $user = new User();
             $user->name = $request->name;
             $user->email = $request->email;
+            //Password and Confirm Password check here
             if (trim($request->password) != trim($request->confirm_password)) {
                 return response()->json(['status' => 'failed', 'message' => 'Password does not match.'], 401);
             }
@@ -57,10 +63,13 @@ class AuthController extends Controller
 
         //return $this->response;
     }
-
+    /**
+     * Summary of login
+     * @param \Illuminate\Http\Request $request
+     * @return mixed|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
     public function login(Request $request)
     {
-        //$user_info = $request->all();
         $email = $request->email;
         $password = $request->password;
         if (Auth::attempt(['email' => $email, 'password' => $password])) {
@@ -77,9 +86,17 @@ class AuthController extends Controller
 
 
     }
-
+    /**
+     * Summary of logout
+     * @param \Illuminate\Http\Request $request
+     * @return mixed|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
     public function logout(Request $request)
     {
+        $accessToken = Auth::guard('api')->user()->token();
+        $accessToken->revoke();
+        return response()->json(['status' => 'success', 'message' => 'Successfully logged out']);
+        /*
         if (Auth::guard('api')->check()) {
             $accessToken = Auth::guard('api')->user()->token();
 
@@ -90,18 +107,25 @@ class AuthController extends Controller
             return response()->json(['status' => 'success', 'message' => 'Successfully logged out']);
         }
         return response(['status' => 'failed', 'message' => 'Unauthorized'], 401);
-
+        */
     }
-
+    /**
+     * Summary of userDetails
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
     public function userDetails()
     {
-        //dd(Auth::guard('api')->user());
+        $user = Auth::guard('api')->user();
+        return response(['status' => 'success', 'data' => $user], 200);
+        /*
         if (Auth::guard('api')->check()) {
-            $user = Auth::guard('api')->user();
+            //$user = Auth::guard('api')->user();
+            $user = User::all();
             return response(['status' => 'success', 'data' => $user], 200);
         } else {
             return response(['status' => 'failed', 'message' => 'Unauthorized'], 401);
         }
+        */
 
     }
 }

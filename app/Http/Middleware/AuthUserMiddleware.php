@@ -5,8 +5,9 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Auth;
 
-class TestMiddleware
+class AuthUserMiddleware
 {
     /**
      * Handle an incoming request.
@@ -15,6 +16,10 @@ class TestMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        return $next($request);
+        if (Auth::guard('api')->check()) {
+            return $next($request);
+        } else {
+            return response(['status' => 'failed', 'message' => 'Unauthorized'], 401);
+        }
     }
 }
